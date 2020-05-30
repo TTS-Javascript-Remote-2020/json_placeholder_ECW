@@ -1,32 +1,32 @@
 # json_placeholder_ECW
-API and AJAX homework
 
-Create buttons that do each of the tasks below:
+APIs, AJAX, and Promises homework
 
-- Render the results to the page in html elements.
+Using the API at http://jsonplaceholder.typicode.com/ create an app with the following functionality.
 
-- Hide the results from the previous actions
+Use Promises for everything.
 
-- Get all posts
+- Login page - Display a login form asking user for a username.
 
-- Get post with id of 10
+  - On Submit, look up the username entered by the user.
+  - If no user is found, display a detailed error message.
+  - If the user is found, store user object and render User's homepage
 
-- Get the comments from post with id of 12
+- User's homepage displays:
 
-- note: comments are part of a different data model, you'll need to structure your endpoint to ask for all of the comments that belong to post #12
+  - User's name
+  - User's post titles
+  - User's albums
 
-- Get all the posts from user with id of 2
+- Post View - Clicking on a post renders a post view, including:
 
-- Create a new post and log the id generated for it by the server
+  - Post title
+  - Post text
+  - A list of comments on the post
+  - A back link to the user homepage
 
-- Replace the post with id of 12 and render the responseJSON
+- Album View - Clicking on an album renders the album page, including:
 
-- Update the title of post with id of 12 and render responseJSON
-
-- Delete the post with id of 12 and render a success message
-
-- Display a list of posts.
-
-- When the user clicks on a post, display all the comments from that post
-
-- Display a link back to all posts
+  - Thumbnails of all the photos and the photo's title
+  - A search box that filters the photos by title as the user types
+  - A back link to the user homepage
