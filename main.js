@@ -2,6 +2,7 @@ const url = "https://jsonplaceholder.typicode.com/";
 
 function clear() {
   $("#container").html("");
+  $("#response").html("");
 }
 
 function getUserByName(username) {
@@ -37,15 +38,64 @@ function handleUsernameError(error) {
   };
 }
 
+function handleGetPostError(error) {
+  console.warn(error);
+  return {
+    id: 9999,
+    title: "Sample Post",
+    body:
+      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Dolor, eligendi quisquam sit nam unde reiciendis cumque fuga aut explicabo nobis molestiae voluptate et non aliquam eius. Illo nulla eaque optio?",
+  };
+}
+
+function getPostByID(postID) {
+  return new Promise(function (resolve, reject) {
+    $.get(url + "posts/" + postID, function (post) {
+      resolve(post);
+    });
+  });
+}
+
 function login() {
   const username = $("#username").val();
   getUserByName(username)
     .catch(handleUsernameError)
     .then(getPostsByUser)
-    .then(renderHomepage);
+    .then(renderHomePage);
 }
 
-function renderHomepage([user, posts]) {
+function renderPost(post) {
+  // console.log(post);
+  $("h1").text(post.title);
+  clear();
+  const body = "<p class='card'>" + post.body + "</p>";
+  $("#response").append(body);
+  return new Promise(function (resolve, reject) {
+    resolve(post.id);
+  });
+}
+
+function getComments(postID) {
+  return new Promise(function (resolve, reject) {
+    $.get(url + "comments?postId=" + postID, function (comments) {
+      resolve(comments);
+    });
+  });
+}
+
+function renderComments(comments) {
+  console.log(comments);
+}
+
+function renderPostPage(postID) {
+  getPostByID(postID)
+    .catch(handleGetPostError)
+    .then(renderPost)
+    .then(getComments)
+    .then(renderComments);
+}
+
+function renderHomePage([user, posts]) {
   $("h1").text("Welcome, " + user.name);
   clear();
   const listHeader = "<h2>Your Posts</h2>";
@@ -61,8 +111,15 @@ function renderHomepage([user, posts]) {
       "</a></li>";
     $("ul").append(li);
   });
-  console.log(user);
-  console.log(posts);
+  $("a").each(function (index) {
+    const self = this;
+    // console.log(index + ": " + $(this).text());
+    $(self).on("click", function (event) {
+      const postID = event.target.id;
+      renderPostPage(postID);
+      event.preventDefault();
+    });
+  });
 }
 
 $(document).ready(function () {
