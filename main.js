@@ -1,6 +1,6 @@
 function login(event) {
   const username = $("#username").val();
-  const url = "http://jsonplaceholder.typicode.com/";
+  const url = "https://jsonplaceholder.typicode.com/";
   $.get(url + "users?username=" + username, function (data) {
     renderHomepage(data);
   });
