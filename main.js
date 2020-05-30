@@ -19,6 +19,8 @@ function getUserByName(username) {
 }
 
 function getPostsByUser(user) {
+  clear();
+  $("#response").html("<h2>Loading posts...</h2>");
   return new Promise(function (resolve, reject) {
     $.get(url + "posts?userId=" + user.id, function (posts) {
       if (posts.length) {
@@ -111,7 +113,7 @@ function renderHomePage([user, posts]) {
       "</a></li>";
     $("ul").append(li);
   });
-  $("a").each(function (index) {
+  $("a").each(function () {
     const self = this;
     // console.log(index + ": " + $(this).text());
     $(self).on("click", function (event) {
