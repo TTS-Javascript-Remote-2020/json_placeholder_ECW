@@ -21,6 +21,10 @@ body {
   align-items: center;
 }
 
+h1 {
+  font-size: 4.5rem;
+}
+
 label {
   display: block;
 }
