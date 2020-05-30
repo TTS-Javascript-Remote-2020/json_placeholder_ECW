@@ -7,11 +7,14 @@
     <title>JSON Placeholder</title>
   </head>
   <body>
-    <button id="get-all-posts">Get All Posts</button>
-    <button id="get-post-id-10">Get Post: 10</button>
-    <button id="get-comments-post-12">Get Comments from Post: 12</button>
-    
-
+    <h1>Please Login</h1>
+    <div class="container">
+      <form action="get">
+        <label for="username">Username: </label>
+        <input type="text" name="username" id="username" />
+        <input type="submit" id="submit" value="Go" />
+      </form>
+    </div>
     <div id="response" class="card"></div>
     <script type="text/javascript" src="jquery-3.5.1.min.js"></script>
     <script type="text/javascript" src="main.js"></script>
