@@ -1,8 +1,11 @@
 const url = "https://jsonplaceholder.typicode.com/";
 
-function clear() {
+// function clear_response() {
+//   $("#response").html("");
+// }
+
+function clear_container() {
   $("#container").html("");
-  $("#response").html("");
 }
 
 function handleUsernameError(error) {
@@ -92,7 +95,7 @@ function handleGetPhotosError(error) {
   ];
 }
 
-function getUserByName(username) {
+function getUserByUsername(username) {
   return new Promise(function (resolve, reject) {
     $.get(url + "users?username=" + username, function (users) {
       $("h1").text("Welcome, " + users[0].name);
@@ -106,12 +109,10 @@ function getUserByName(username) {
 }
 
 function getPostsByUser(user) {
-  clear();
-  $("#response").html("<h2>Loading posts...</h2>");
   return new Promise(function (resolve, reject) {
     $.get(url + "posts?userId=" + user.id, function (posts) {
       if (posts.length) {
-        resolve([user, posts]);
+        resolve(posts);
       } else {
         reject("No posts found for userId: " + user.id);
       }
@@ -150,7 +151,11 @@ function getAlbumByID(albumID) {
 function getPhotosByAlbumID(albumID) {
   return new Promise(function (resolve, reject) {
     $.get(url + "albums/" + albumID + "/photos", function (photos) {
-      resolve(photos);
+      if (photos.length) {
+        resolve(photos);
+      } else {
+        reject("No photos found for albumId: " + albumID);
+      }
     });
   });
 }
@@ -167,13 +172,12 @@ function getComments(postID) {
   });
 }
 
-function renderHomePage([user, posts]) {
-  $("h1").text("Welcome, " + user.name);
-  clear();
-  const listHeader = "<h2>Your Posts</h2>";
-  $("#response").append(listHeader);
-  const ul = "<ul></ul>";
-  $("#response").append(ul);
+function renderPosts(posts) {
+  $("#loading-posts").remove();
+  const postsHeader = "<h2>Your Posts</h2>";
+  $("#posts").append(postsHeader);
+  const ul = "<ul id='posts-list'></ul>";
+  $("#posts").append(ul);
   posts.forEach(function (post) {
     const li =
       "<li><a href='#' id='" +
@@ -181,16 +185,34 @@ function renderHomePage([user, posts]) {
       "' class='post-link'>" +
       post.title +
       "</a></li>";
-    $("ul").append(li);
+    $("#posts-list").append(li);
   });
-  $("a").each(function () {
-    const self = this;
-    // console.log(index + ": " + $(this).text());
-    $(self).on("click", function (event) {
-      const postID = event.target.id;
-      renderPostPage(postID);
-      event.preventDefault();
-    });
+  $("a.post-link").on("click", function (event) {
+    const postID = event.target.id;
+    renderPostPage(postID);
+    event.preventDefault();
+  });
+}
+
+function renderAlbums(albums) {
+  $("#loading-albums").remove();
+  const albumsHeader = "<h2>Your Albums</h2>";
+  $("#albums").append(albumsHeader);
+  const ul = "<ul id='albums-list'></ul>";
+  $("#albums").append(ul);
+  albums.forEach(function (album) {
+    const li =
+      "<li><a href='#' id = '" +
+      album.id +
+      "' class='album-link'>" +
+      album.title +
+      "</a></li>";
+    $("#albums-list").append(li);
+  });
+  $("a.album-link").on("click", function (event) {
+    const albumID = event.target.id;
+    renderAlbumPage(albumID);
+    event.preventDefault();
   });
 }
 
@@ -199,41 +221,67 @@ function renderPostPage(postID) {
     .catch(handleGetPostsError)
     .then(renderPost)
     .then(getComments)
+    .catch(handleCommentsError)
     .then(renderComments);
 }
 
 function renderAlbumPage(albumID) {
-  const albumPromise = getAlbumByID(albumID);
-  const photosPromise = getPhotosByAlbumID(albumID);
-  Promise.all([albumPromise, photosPromise]).then(funtion (results) {
-    renderAlbum(results);
+  getAlbumByID(albumID).then(renderAlbumTitle);
+  getPhotosByAlbumID(albumID).catch(handleGetPhotosError).then(renderPhotos);
+}
+
+function renderAlbumTitle(album) {
+  $("h1").text(album.title);
+}
+
+function renderPhotos(photos) {
+  const ul = "<ul id='photos-list'></ul>";
+  clear_container();
+  $("#container").append(ul);
+  photos.forEach(function (photo) {
+    const img =
+      "<a href='" + photo.url + "'><img src='" + photo.thumbnailUrl + "'/></a>";
+    $("#photos-list").append(img);
   });
 }
 
 function renderPost(post) {
-  // console.log(post);
   $("h1").text(post.title);
-  clear();
-  const body = "<p class='card'>" + post.body + "</p>";
+  clear_container();
+  const body = "<p class='card body'>" + post.body + "</p>";
   $("#response").append(body);
   return new Promise(function (resolve, reject) {
     resolve(post.id);
   });
 }
 
-function renderAlbum([album, photos]) {
-  $("h1").text(album.title);
-}
-
 function renderComments(comments) {
   console.log(comments);
 }
 
+async function renderHomePage(user) {
+  $("#container").append("<div id='posts' class='card'></div>");
+  $("#container").append("<div id='albums' class='card'></div>");
+  getPostsByUser(user).then(renderPosts);
+  getAlbumsByUser(user).catch(handleGetAlbumsError).then(renderAlbums);
+}
+
+function displayHomepageLoadingMessages(user) {
+  $("h1").text("Welcome, " + user.name);
+  $("#response").html(
+    "<h3 id='loading-posts' class='loading'>Loading Posts...</h3><h3 id='loading-albums' class='loading'>Loading Albums...</h3>"
+  );
+  return new Promise(function (resolve, reject) {
+    resolve(user);
+  });
+}
+
 function login() {
   const username = $("#username").val();
-  getUserByName(username)
+  $("#response").html("<h3 class='loading'>Logging in...</h3>");
+  getUserByUsername(username)
     .catch(handleUsernameError)
-    .then(getPostsByUser)
+    .then(displayHomepageLoadingMessages)
     .then(renderHomePage);
 }
 

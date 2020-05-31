@@ -15,11 +15,11 @@ body {
   box-sizing: border-box;
   background-color: #ddd;
   height: 100vh;
-  display: flex;
+  /* display: flex;
   flex-direction: column;
   justify-content: space-evenly;
   align-items: center;
-  align-content: center;
+  align-content: center; */
   padding: 3rem;
 }
 
@@ -29,10 +29,15 @@ h1 {
 
 h2 {
   font-size: 2.4rem;
+  display: block;
+}
+
+h3 {
+  font-size: 2rem;
 }
 
 #response {
-  display: flex;
+  /* display: flex; */
 }
 
 label {
@@ -45,6 +50,7 @@ input[type="text"]:focus {
 
 ul {
   list-style: none;
+  display: block;
 }
 
 a,
@@ -64,4 +70,11 @@ a:visited {
 
 ul.comments {
   list-style: none;
+}
+
+.loading {
+}
+
+.body {
+  font-size: 1.9rem;
 }
