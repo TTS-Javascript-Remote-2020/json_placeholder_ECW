@@ -32,3 +32,10 @@ Use Promises for everything.
   - Thumbnails of all the photos and the photo's title
   - A search box that filters the photos by title as the user types
   - A back link to the user homepage
+
+- TODO:
+
+  - Add back navigation buttons
+  - Add captions to thumbnails on Album View
+  - Add filter feature to Album View
+  - Add styles
