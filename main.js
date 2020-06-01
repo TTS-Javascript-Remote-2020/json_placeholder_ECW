@@ -95,56 +95,14 @@ function handleGetPhotosError(error) {
   ];
 }
 
-function getUserByUsername(username) {
-  return new Promise(function (resolve, reject) {
-    $.get(url + "users?username=" + username, function (users) {
-      $("h1").text("Welcome, " + users[0].name);
-      if (users.length) {
-        resolve(users[0]);
-      } else {
-        reject("No user found with username: " + username);
-      }
-    });
-  });
-}
-
-function getPostsByUser(user) {
-  return new Promise(function (resolve, reject) {
-    $.get(url + "posts?userId=" + user.id, function (posts) {
-      if (posts.length) {
-        resolve(posts);
-      } else {
-        reject("No posts found for userId: " + user.id);
-      }
-    });
-  });
-}
-
-function getAlbumsByUser(user) {
-  return new Promise(function (resolve, reject) {
-    $.get(url + "users/" + user.id + "/albums", function (albums) {
-      if (albums.length) {
-        resolve(albums);
-      } else {
-        reject("No albums found for userId: " + user.id);
-      }
-    });
-  });
-}
-
-function getPostByID(postID) {
-  return new Promise(function (resolve, reject) {
-    $.get(url + "posts/" + postID, function (post) {
-      resolve(post);
-    });
-  });
-}
-
-function getAlbumByID(albumID) {
-  return new Promise(function (resolve, reject) {
-    $.get(url + "albums/" + albumID, function (album) {
-      resolve(album);
-    });
+function renderPhotos(photos) {
+  const ul = "<ul id='photos-list'></ul>";
+  clear_container();
+  $("#container").append(ul);
+  photos.forEach(function (photo) {
+    const img =
+    "<a href='" + photo.url + "'><img src='" + photo.thumbnailUrl + "'/></a>";
+    $("#photos-list").append(img);
   });
 }
 
@@ -160,6 +118,24 @@ function getPhotosByAlbumID(albumID) {
   });
 }
 
+function renderAlbumTitle(album) {
+  $("h1").text(album.title);
+}
+
+function renderComments(comments) {
+  console.log(comments);
+}
+
+function renderPost(post) {
+  $("h1").text(post.title);
+  clear_container();
+  const body = "<p class='card body'>" + post.body + "</p>";
+  $("#response").append(body);
+  return new Promise(function (resolve, reject) {
+    resolve(post.id);
+  });
+}
+
 function getComments(postID) {
   return new Promise(function (resolve, reject) {
     $.get(url + "comments?postId=" + postID, function (comments) {
@@ -169,6 +145,58 @@ function getComments(postID) {
         reject("No comments found for postId: " + postID);
       }
     });
+  });
+}
+
+function getAlbumByID(albumID) {
+  return new Promise(function (resolve, reject) {
+    $.get(url + "albums/" + albumID, function (album) {
+      resolve(album);
+    });
+  });
+}
+
+function getPostByID(postID) {
+  return new Promise(function (resolve, reject) {
+    $.get(url + "posts/" + postID, function (post) {
+      resolve(post);
+    });
+  });
+}
+
+function renderAlbumPage(albumID) {
+  getAlbumByID(albumID).then(renderAlbumTitle);
+  getPhotosByAlbumID(albumID).catch(handleGetPhotosError).then(renderPhotos);
+}
+
+function renderPostPage(postID) {
+  getPostByID(postID)
+  .catch(handleGetPostsError)
+    .then(renderPost)
+    .then(getComments)
+    .catch(handleCommentsError)
+    .then(renderComments);
+}
+
+function renderAlbums(albums) {
+  $("#loading-albums").remove();
+  const albumsHeader = "<h2>Your Albums</h2>";
+  $("#albums").append(albumsHeader);
+  const ul = "<ul id='albums-list'></ul>";
+  $("#albums").append(ul);
+  albums.forEach(function (album) {
+    const li =
+      "<li><a href='#' id = '" +
+      album.id +
+      "' class='album-link'>" +
+      album.title +
+      "</a></li>";
+    $("#albums-list").append(li);
+  });
+  $("a.album-link").on("click", function (event) {
+    const albumID = event.target.id;
+    renderAlbumPage(albumID);
+    event.preventDefault();
   });
 }
 
@@ -194,75 +222,34 @@ function renderPosts(posts) {
   });
 }
 
-function renderAlbums(albums) {
-  $("#loading-albums").remove();
-  const albumsHeader = "<h2>Your Albums</h2>";
-  $("#albums").append(albumsHeader);
-  const ul = "<ul id='albums-list'></ul>";
-  $("#albums").append(ul);
-  albums.forEach(function (album) {
-    const li =
-      "<li><a href='#' id = '" +
-      album.id +
-      "' class='album-link'>" +
-      album.title +
-      "</a></li>";
-    $("#albums-list").append(li);
-  });
-  $("a.album-link").on("click", function (event) {
-    const albumID = event.target.id;
-    renderAlbumPage(albumID);
-    event.preventDefault();
-  });
-}
-
-function renderPostPage(postID) {
-  getPostByID(postID)
-    .catch(handleGetPostsError)
-    .then(renderPost)
-    .then(getComments)
-    .catch(handleCommentsError)
-    .then(renderComments);
-}
-
-function renderAlbumPage(albumID) {
-  getAlbumByID(albumID).then(renderAlbumTitle);
-  getPhotosByAlbumID(albumID).catch(handleGetPhotosError).then(renderPhotos);
-}
-
-function renderAlbumTitle(album) {
-  $("h1").text(album.title);
-}
-
-function renderPhotos(photos) {
-  const ul = "<ul id='photos-list'></ul>";
-  clear_container();
-  $("#container").append(ul);
-  photos.forEach(function (photo) {
-    const img =
-      "<a href='" + photo.url + "'><img src='" + photo.thumbnailUrl + "'/></a>";
-    $("#photos-list").append(img);
-  });
-}
-
-function renderPost(post) {
-  $("h1").text(post.title);
-  clear_container();
-  const body = "<p class='card body'>" + post.body + "</p>";
-  $("#response").append(body);
+function getAlbumsByUser(user) {
   return new Promise(function (resolve, reject) {
-    resolve(post.id);
+    $.get(url + "users/" + user.id + "/albums", function (albums) {
+      if (albums.length) {
+        resolve(albums);
+      } else {
+        reject("No albums found for userId: " + user.id);
+      }
+    });
   });
 }
 
-function renderComments(comments) {
-  console.log(comments);
+function getPostsByUser(user) {
+  return new Promise(function (resolve, reject) {
+    $.get(url + "posts?userId=" + user.id, function (posts) {
+      if (posts.length) {
+        resolve(posts);
+      } else {
+        reject("No posts found for userId: " + user.id);
+      }
+    });
+  });
 }
 
 async function renderHomePage(user) {
   $("#container").append("<div id='posts' class='card'></div>");
   $("#container").append("<div id='albums' class='card'></div>");
-  getPostsByUser(user).then(renderPosts);
+  getPostsByUser(user).catch(handleGetPostsError).then(renderPosts);
   getAlbumsByUser(user).catch(handleGetAlbumsError).then(renderAlbums);
 }
 
@@ -273,6 +260,19 @@ function displayHomepageLoadingMessages(user) {
   );
   return new Promise(function (resolve, reject) {
     resolve(user);
+  });
+}
+
+function getUserByUsername(username) {
+  return new Promise(function (resolve, reject) {
+    $.get(url + "users?username=" + username, function (users) {
+      $("h1").text("Welcome, " + users[0].name);
+      if (users.length) {
+        resolve(users[0]);
+      } else {
+        reject("No user found with username: " + username);
+      }
+    });
   });
 }
 
