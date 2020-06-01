@@ -1,11 +1,13 @@
 const url = "https://jsonplaceholder.typicode.com/";
+const response = $("#response");
+const container = $("#container");
 
 // function clear_response() {
-//   $("#response").html("");
+//   response.html("");
 // }
 
 function clear_container() {
-  $("#container").html("");
+  container.html("");
 }
 
 function handleUsernameError(error) {
@@ -98,10 +100,10 @@ function handleGetPhotosError(error) {
 function renderPhotos(photos) {
   const ul = "<ul id='photos-list'></ul>";
   clear_container();
-  $("#container").append(ul);
+  container.append(ul);
   photos.forEach(function (photo) {
     const img =
-    "<a href='" + photo.url + "'><img src='" + photo.thumbnailUrl + "'/></a>";
+      "<a href='" + photo.url + "'><img src='" + photo.thumbnailUrl + "'/></a>";
     $("#photos-list").append(img);
   });
 }
@@ -123,14 +125,26 @@ function renderAlbumTitle(album) {
 }
 
 function renderComments(comments) {
-  console.log(comments);
+  const ul = "<ul id='comments-list'></ul>";
+  container.append(ul);
+  comments.forEach(function (comment) {
+    const li =
+      "<li><h4 class='comment-title'><a href='mailto://" +
+      comment.email +
+      "'>" +
+      comment.name +
+      "</a></h4><p>" +
+      comment.body +
+      "</p></li>";
+    $("#comments-list").append(li);
+  });
 }
 
 function renderPost(post) {
   $("h1").text(post.title);
   clear_container();
   const body = "<p class='card body'>" + post.body + "</p>";
-  $("#response").append(body);
+  container.append(body);
   return new Promise(function (resolve, reject) {
     resolve(post.id);
   });
@@ -171,7 +185,7 @@ function renderAlbumPage(albumID) {
 
 function renderPostPage(postID) {
   getPostByID(postID)
-  .catch(handleGetPostsError)
+    .catch(handleGetPostsError)
     .then(renderPost)
     .then(getComments)
     .catch(handleCommentsError)
@@ -247,15 +261,16 @@ function getPostsByUser(user) {
 }
 
 async function renderHomePage(user) {
-  $("#container").append("<div id='posts' class='card'></div>");
-  $("#container").append("<div id='albums' class='card'></div>");
+  container.append("<div id='posts' class='card'></div>");
+  container.append("<div id='albums' class='card'></div>");
   getPostsByUser(user).catch(handleGetPostsError).then(renderPosts);
   getAlbumsByUser(user).catch(handleGetAlbumsError).then(renderAlbums);
 }
 
 function displayHomepageLoadingMessages(user) {
   $("h1").text("Welcome, " + user.name);
-  $("#response").html(
+  clear_container();
+  response.html(
     "<h3 id='loading-posts' class='loading'>Loading Posts...</h3><h3 id='loading-albums' class='loading'>Loading Albums...</h3>"
   );
   return new Promise(function (resolve, reject) {
@@ -278,7 +293,7 @@ function getUserByUsername(username) {
 
 function login() {
   const username = $("#username").val();
-  $("#response").html("<h3 class='loading'>Logging in...</h3>");
+  response.html("<h3 class='loading'>Logging in...</h3>");
   getUserByUsername(username)
     .catch(handleUsernameError)
     .then(displayHomepageLoadingMessages)
