@@ -35,7 +35,8 @@ Use Promises for everything.
 
 - TODO:
 
-  - Add back navigation buttons
   - Add captions to thumbnails on Album View
+  - Add error pages
+  - Add back navigation buttons
   - Add filter feature to Album View
   - Add styles
